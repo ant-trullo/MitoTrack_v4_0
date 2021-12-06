@@ -1,0 +1,9 @@
+This file is part of MitoTrack_v4_0.
+
+    MitoTrack_v4_0 is free software: you can redistribute it and/or modify
+    it under the terms of the CeCILL (https://cecill.info/).
+
+    MitoTrack_v4_0 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+
