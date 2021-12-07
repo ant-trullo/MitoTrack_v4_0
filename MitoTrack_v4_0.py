@@ -72,11 +72,6 @@ class MainWindow(QtWidgets.QMainWindow):
         save_partial_action.setStatusTip('Save partial analysis')
         save_partial_action.triggered.connect(self.save_partial)
 
-        rescue_action  =  QtWidgets.QAction(QtGui.QIcon('Icons/float-blisters.png'), '&Rescue lost analysis', self)
-        #         rescue_action.setShortcut('Ctrl+S')
-        rescue_action.setStatusTip('Recover the partial job done in case of computer crash')
-        #         rescue_action.triggered.connect(self.rescue)
-
         popup_nuclei_raw_action  =  QtWidgets.QAction('&Pop-up Raw Nuclei', self)
         popup_nuclei_raw_action.setStatusTip('Pop up image frames with the raw nuclei data')
         popup_nuclei_raw_action.triggered.connect(self.popup_nuclei_raw)
@@ -143,7 +138,6 @@ class MainWindow(QtWidgets.QMainWindow):
         check_results_action.setStatusTip('Tool to check results of the analysis')
         check_results_action.triggered.connect(self.check_results)
 
-
         self.statusBar()
 
         menubar   =  self.menuBar()
@@ -153,7 +147,6 @@ class MainWindow(QtWidgets.QMainWindow):
         fileMenu.addAction(save_partial_action)
         fileMenu.addAction(load_partial_action)
         fileMenu.addAction(load_merged_action)
-        fileMenu.addAction(rescue_action)
         fileMenu.addAction(exitAction)
 
         modifyMenu  =  menubar.addMenu('&Modify')
@@ -340,11 +333,6 @@ class MainWindow(QtWidgets.QMainWindow):
         spots_visual_btn.clicked.connect(self.spots_visual)
         spots_visual_btn.setToolTip('Activate a tool to check spots detection')
         spots_visual_btn.setFixedSize(110, 25)
-
-        #        nuc_spots_conn_btn  =  QtWidgets.QPushButton("S-N Connect", self)
-        #        nuc_spots_conn_btn.clicked.connect(self.nuc_spots_conn)
-        #        nuc_spots_conn_btn.setToolTip('Connect detected spots with tracked nuclei')
-        #        nuc_spots_conn_btn.setFixedSize(110, 25)
 
         time_step_lbl  =  QtWidgets.QLabel('T Step', self)
         time_step_lbl.setFixedSize(50, 25)
@@ -549,9 +537,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setGeometry(100, 100, 1200, 800)
         self.setWindowTitle(self.soft_version)
-        self.setWindowIcon(QtGui.QIcon('Icons/DrosophilaIcon.png'))
+        self.setWindowIcon(QtGui.QIcon('Icons/MLL_Logo2.png'))
         self.show()
-
 
     def closeEvent(self, event):
         "Close the GUI, asking confirmation"
@@ -563,18 +550,15 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             event.ignore()
 
-
     def busy_indicator(self):
         """Write a red text (BUSY) as a label on the GUI (bottom left)"""
         self.busy_lbl.setText("Busy")
         self.busy_lbl.setStyleSheet('color: red')
 
-
     def ready_indicator(self):
         """Write a green text (READY) as a label on the GUI (bottom left)"""
         self.busy_lbl.setText("Ready")
         self.busy_lbl.setStyleSheet('color: green')
-
 
     def crop_stack(self):
         """Call a popup tool to crop the raw data before the analysis"""
@@ -582,14 +566,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.mpp7.show()
         self.mpp7.procStart.connect(self.crop_tool_sgnl)
 
-
     def crop_tool_sgnl(self, message):
         """Update the work of the CroppingTool on the main GUI"""
         pts  =  self.mpp7.roi.parentBounds()
-        x0   =  np.round(np.max([0, pts.x()])).astype(np.int)
-        y0   =  np.round(np.max([0, pts.y()])).astype(np.int)
-        x1   =  np.round(np.min([pts.x() + pts.width(), self.imarray_red.shape[1]])).astype(np.int)
-        y1   =  np.round(np.min([pts.y() + pts.height(), self.imarray_red.shape[2]])).astype(np.int)
+        x0   =  np.round(np.max([0, pts.x()])).astype(int)
+        y0   =  np.round(np.max([0, pts.y()])).astype(int)
+        x1   =  np.round(np.min([pts.x() + pts.width(), self.imarray_red.shape[1]])).astype(int)
+        y1   =  np.round(np.min([pts.y() + pts.height(), self.imarray_red.shape[2]])).astype(int)
 
         self.imarray_red    =  self.imarray_red[:, x0:x1, y0:y1]
         self.imarray_green  =  self.imarray_green[:, x0:x1, y0:y1]
@@ -598,7 +581,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.mpp7.close()
 
-
     def gaus_log_detect(self, text):
         """Manage the flags changed with the combobox for nuclei detection"""
         self.gaus_log_detect_value  =  text
@@ -606,7 +588,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.parameter_detect_lbl.setText("Gauss Size")
         else:
             self.parameter_detect_lbl.setText("Thr Coeff")
-
 
     def load_several_files(self):
         """Load and concatenate several files to analyze"""
@@ -638,13 +619,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ready_indicator()
 
-
     def load_partial_analysis(self):
         """Load partial analysis in GUI to let you work on or check it back"""
         self.folder_storedata  =  str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select the folder with the analyzed data"))
         self.fname_edt.setText(self.folder_storedata)
         self.time_step_edt.setText(str(np.load(self.folder_storedata + "/time_step_value.npy")[0]))
-
 
     def start_cut(self):
         """Define the first frame you will analyze"""
@@ -655,7 +634,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sld1.setMaximum(self.filedata.imarray_red[:, 0, 0].size - 1)
         self.sld1.setValue(0)
 
-
     def end_cut(self):
         """Define the last frame you will analyze"""
         self.filedata.imarray_red    =  self.filedata.imarray_red[:self.sld1.value() + 1, :, :]
@@ -664,7 +642,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.end_cut_var             =  self.sld1.value()
         self.sld1.setMaximum(self.filedata.imarray_red[:, 0, 0].size - 1)
         self.sld1.setValue(self.filedata.imarray_red[:, 0, 0].size - 1)
-
 
     def reload_files(self):
         """Reload the same files you already loaded without select them back"""
@@ -690,13 +667,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ready_indicator()
 
-
     def chop(self):
         """Call the ChopStack tool to define analysis mile stones"""
         self.folder_storedata  =  str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select the folder to store data"))
         self.chopw             =  ChopStack(self.filedata.imarray_red, self.filedata.imarray_green, self.filedata.green4D, self.time_step_value, self.nucs_spts_ch, self.folder_storedata)
         self.chopw.show()
-
 
     def sel_fstchop(self):
         """Select the first analysis chop (before mitosis)"""
@@ -705,9 +680,6 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QApplication.processEvents()
 
         try:
-            rescue_txt = open('WhichPart.txt', "w")
-            rescue_txt.write(self.folder_storedata + "BM")
-            rescue_txt.close()
 
             self.sel_lbl.setText("Before Mitosis")
             self.filedata  =  LoadPartialAnalysisTool.LoadPartialAnalysisFrstChop(self.folder_storedata)
@@ -776,7 +748,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ready_indicator()
 
-
     def sel_scdchop(self):
         """Select the second analysis chop (during mitosis)"""
         self.busy_indicator()
@@ -805,7 +776,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.dm     =  self.dm['arr_0']
                 #                 self.labbs  =  NucleiDetect.NucleiDetect(self.filedata.imarray_red, self.gfilt2_detect_value).labbs
                 self.labbs  =  np.load(self.folder_storedata + '/lbl_segm_dm.npz')['arr_0']
-                self.mpp2   =  ModifierMitosisTool(self.filedata.imarray_red, self.labbs, self.dm.astype(np.int), 0)
+                self.mpp2   =  ModifierMitosisTool(self.filedata.imarray_red, self.labbs, self.dm.astype(int), 0)
                 self.mpp2.show()
                 self.mpp2.size_thr_edt.setText(a[2][17:-1])
                 self.mpp2.overlap_ratio_edt.setText(a[3][16:-1])
@@ -818,7 +789,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.labbs_flag            =  0
                 self.nuclei_flag           =  0
                 self.nuclei_t_visual_flag  =  1
-
 
                 #                 self.spots_segm     =  np.load(self.folder_storedata + '/trk_spots_dm.npy')
                 self.spots_segm     =  SpotsFeaturesLoader.SpotsFeaturesLoader(self.folder_storedata + '/trk_spots_dm_coords.npy').spts_mtx
@@ -849,7 +819,6 @@ class MainWindow(QtWidgets.QMainWindow):
             traceback.print_exc()
 
         self.ready_indicator()
-
 
     def sel_trdchop(self):
         """Select the third analysis chop (after mitosis)"""
@@ -925,7 +894,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ready_indicator()
 
-
     def sld1_update(self):
         """Synchronize all the frames in the main GUI when the slider is moved to browse data"""
         self.time_lbl.setText("time  " + time.strftime("%M:%S", time.gmtime(self.sld1.value() * self.time_step_value)))
@@ -943,46 +911,37 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.spots_segm_flag == 1:
             self.frame4.setImage((np.sign(self.spots_3D.spots_ints)[self.sld1.value(), :, :]))
 
-
     def parameter_detect_var(self, text):
         """Set the parameter for nuclei detection"""
-        self.parameter_detect_value  =  np.float(text)
-
+        self.parameter_detect_value  =  float(text)
 
     def gfilt2_detect_var(self, text):
         """Set the kernel size for the nuclei pre-smoothing"""
-        self.gfilt2_detect_value  =  np.float(text)
-
+        self.gfilt2_detect_value  =  float(text)
 
     def gfilt_water_var(self, text):
         """Set the parameter for the watershed algorithm"""
-        self.gfilt_water_value  =  np.int(text)
-
+        self.gfilt_water_value  =  int(text)
 
     def circ_thr_var(self, text):
         """Set the circularity threshold"""
         self.circ_thr_value  =  float(text)
 
-
     def dist_thr_var(self, text):
         """Set the distance threshold value for nuclei tracking"""
-        self.dist_thr_value  =  int(np.float(text))
-
+        self.dist_thr_value  =  int(float(text))
 
     def spots_thr_var(self, text):
         """Set the threshold value for spots detection"""
-        self.spots_thr_value  =  np.float(text)
-
+        self.spots_thr_value  =  float(text)
 
     def volume_thr_var(self, text):
         """Set the volume threshold value for the spots discrimination"""
-        self.volume_thr_value  =  np.int(text)
-
+        self.volume_thr_value  =  int(text)
 
     def time_step_var(self, text):
         """Set the time step value (generally is set automatically by the software)"""
-        self.time_step_value  =  np.float(text)
-
+        self.time_step_value  =  float(text)
 
     def merge_analysis(self):
         """Activate tool to merge partial analysis  results"""
@@ -1005,7 +964,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 spots_tracked  =  FakeSpotsRemover.FakeSpotsRemoverMerged(mm.conc_spt, mm.conc_nuc, mm.conc_wild, mm.frames_bm, mm.frames_dm, max_dist_ns).spots_tracked
             else:
                 print("No Filter")
-                spots_tracked  =  SpotsConnection.SpotsConnection(mm.conc_nuc, mm.conc_spt.astype(np.int), max_dist_ns).spots_tracked
+                spots_tracked  =  SpotsConnection.SpotsConnection(mm.conc_nuc, mm.conc_spt.astype(int), max_dist_ns).spots_tracked
 
             evol_check  =  EvolutionController.EvolutionControllerTOT(mm.conc_nuc, mm.conc_wild, spots_tracked, mm.frames_bm, mm.frames_dm, max_dist_ns)
             nuc_active  =  NucleiSpotsConnection.NucleiSpotsConnection4Merged(mm.conc_wild * np.sign(evol_check.conc_nuc_ok), spots_tracked, max_dist_ns)
@@ -1016,7 +975,6 @@ class MainWindow(QtWidgets.QMainWindow):
             traceback.print_exc()
 
         self.ready_indicator()
-
 
     def load_merged(self):
         """Load merged analysis"""
@@ -1038,42 +996,34 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ready_indicator()
 
-
     def popup_nuclei_raw(self):
         """Popup tool to visualize raw data nuclei"""
         PopUpTool.PopUpTool([self.filedata.imarray_red, 'Nuclei Raw Data'])
-
 
     def popup_nuclei_detected(self):
         """Popup tool to visualize detected nuclei"""
         PopUpTool.PopUpTool([np.sign(self.labbs), 'Detected Nuclei'])
 
-
     def popup_nuclei_segmented(self):
         """Popup tool to visualize segmented nuclei"""
         PopUpTool.PopUpTool([self.nuclei_labels, 'Segmented Nuclei', self.mycmap])
-
 
     def popup_nuclei_trackeded(self):
         """Popup tool to visualize raw data nuclei"""
         PopUpTool.PopUpTool([self.nuclei_t, 'Segmented Nuclei', self.mycmap])
 
-
     def popup_spots_raw(self):
         """Popup tool to visualize raw data spots"""
         PopUpTool.PopUpTool([self.filedata.imarray_green, 'Spots Raw Data'])
-
 
     def popup_spots_segm(self):
         """Popup tool to visualize segmented spots"""
         PopUpTool.PopUpTool([self.spots_segm, 'Segmented Spots'])
 
-
     def popup_nucactive(self):
         """Popup tool to visualize active nuclei"""
         pg.image(self.nuclei_active_visual, title="Active Nuclei")
         pg.plot(self.n_active_vector, pen='r', symbol='x')
-
 
     def nuclei_detection(self):
         """Nuclei detection"""
@@ -1099,7 +1049,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ready_indicator()
 
-
     def nuclei_segmentation(self):
         """Segment nuclei"""
         self.busy_indicator()
@@ -1119,7 +1068,6 @@ class MainWindow(QtWidgets.QMainWindow):
             traceback.print_exc()
 
         self.ready_indicator()
-
 
     def nuclei_tracking(self):
         """Track nuclei"""
@@ -1142,7 +1090,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ready_indicator()
 
-
     def spots_detect(self):
         """Detect spots"""
         self.busy_indicator()
@@ -1151,13 +1098,8 @@ class MainWindow(QtWidgets.QMainWindow):
         reload(SpotsDetectionChopper)
 
         try:
-            #            self.spots_segm_old     =  SpotsDetection.SpotsDetection(self.filedata.imarray_green.astype(np.float), self.spots_thr_value).spots_mask
-            self.spots_3D     =  SpotsDetectionChopper.SpotsDetectionChopper(self.filedata.green4D.astype(np.float), self.spots_thr_value, self.volume_thr_value)
-            #            self.max_dist_ns        =  SpotNcuDistanceThr.getNumb()
-            #            self.spots_tracked      =  SpotsConnection.SpotsConnection(self.nuclei_t, self.spots_segm_old, self.max_dist_ns).spots_tracked
-            #            self.spots_segm         =  np.sign(self.spots_tracked)
+            self.spots_3D     =  SpotsDetectionChopper.SpotsDetectionChopper(self.filedata.green4D.astype(float), self.spots_thr_value, self.volume_thr_value)
             self.spots_segm_flag    =  1
-            #            self.frame4.setImage(self.spots_segm[self.sld1.value(), :, :])
             self.frame4.setImage(np.sign(self.spots_3D.spots_ints)[self.sld1.value(), :, :])
             self.nuc_spots_conn()
 
@@ -1165,7 +1107,6 @@ class MainWindow(QtWidgets.QMainWindow):
             traceback.print_exc()
 
         self.ready_indicator()
-
 
     def nuc_spots_conn(self):
         """Connect tracked nuclei and detected spots"""
@@ -1187,13 +1128,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ready_indicator()
 
-
     def modify_cycle_tool(self):
         """Activate the tool for manual corrections to the before or after mitosis part"""
         self.mpp  =  ModifierCycleTool(self.filedata.imarray_red, np.copy(self.nuclei_labels), self.sld1.value())
         self.mpp.show()
         self.mpp.procStart.connect(self.sgnl_update_cycle)
-
 
     def sgnl_update_cycle(self, message):
         """Update manual corrections from the popup tool to the main GUI"""
@@ -1213,13 +1152,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.spots_segm_flag == 1:
             self.frame4.setImage(self.spots_segm[message, :, :])
 
-
     def modify_mitosis_tool(self):
         """Activate the tool to track nuclei during mitosis"""
         self.mpp2  =  ModifierMitosisTool(self.filedata.imarray_red, self.labbs, np.zeros(self.labbs.shape, dtype=np.uint16), self.sld1.value())
         self.mpp2.show()
         self.mpp2.procStart.connect(self.sgnl_update_mitosis)
-
 
     def sgnl_update_mitosis(self, message):
         """"Update manual corrections from the popup tool to the main GUI"""
@@ -1244,12 +1181,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.spots_segm_flag == 1:
             self.frame4.setImage(self.spots_segm[message, :, :])
 
-
     def spots_visual(self):
         """Activate tool to visualize the performed spots detection"""
         self.spsp  =  SpotsAnalyser(self.filedata.imarray_green, self.spots_tracked)
         self.spsp.show()
-
 
     def mdetect(self):
         """Detect nuclei during mitosis"""
@@ -1262,7 +1197,7 @@ class MainWindow(QtWidgets.QMainWindow):
             steps  =  labbs.shape[0]
 
             for t in range(steps):
-                labbs[t, :, :]  =  skmr.remove_small_objects(labbs[t, :, :].astype(np.int), 50)
+                labbs[t, :, :]  =  skmr.remove_small_objects(labbs[t, :, :].astype(int), 50)
 
             self.labbs  =  labbs
             self.frame2.setImage(np.sign(self.labbs[self.sld1.value(), :, :]))
@@ -1274,7 +1209,6 @@ class MainWindow(QtWidgets.QMainWindow):
             traceback.print_exc()
 
         self.ready_indicator()
-
 
     def save_partial(self):
         """Save partial analysis"""
@@ -1320,7 +1254,6 @@ class MainWindow(QtWidgets.QMainWindow):
             elif self.bm_dm_am == 3:
                 flagname  =  "a"
                 file  =  open(self.folder_storedata + '/after_mitosis_params.txt', "w")
-                #                file.write("Gaussian Filter Kernel Size = " + str(self.parameter_detect_value))
                 if self.gaus_log_detect_value == "Gauss Flt":
                     file.write("Gaussian Filter Kernel Size = " + str(self.parameter_detect_value))
                 else:
@@ -1336,21 +1269,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 file.close()
 
             np.savez_compressed(self.folder_storedata + "/lbl_nuclei_" + flagname + "m.npz", self.nuclei_t)
-            #             np.save(self.folder_storedata + "/trk_spots_" + flagname + "m.npy", self.spots_tracked)
             SpotsFeaturesSaver.SpotsFeaturesSaver(self.spots_tracked, self.folder_storedata + "/trk_spots_" + flagname + "m_coords.npy")
-            #             np.save(self.folder_storedata + "/ints_spots_" + flagname + "m.npy", self.spots_3D.spots_ints)
             SpotsFeaturesSaver.SpotsFeaturesSaver(self.spots_3D.spots_ints, self.folder_storedata + "/ints_spots_" + flagname + "m_coords.npy")
-            #             np.save(self.folder_storedata + "/vol_spots_" + flagname + "m.npy", self.spots_3D.spots_vol)
             SpotsFeaturesSaver.SpotsFeaturesSaver(self.spots_3D.spots_vol, self.folder_storedata + "/vol_spots_" + flagname + "m_coords.npy")
             np.save(self.folder_storedata + "/tzxy_spots_" + flagname + "m.npy", self.spots_3D.spots_tzxy)
             np.save(self.folder_storedata + "/time_step_value.npy", np.array([self.time_step_value]))
-
 
         except Exception:
             traceback.print_exc()
 
         self.ready_indicator()
-
 
     def tile_coordinates(self):
         tile_info   =  TileMap.getNumb()
@@ -1358,11 +1286,9 @@ class MainWindow(QtWidgets.QMainWindow):
         txt_path    =  QtWidgets.QFileDialog.getOpenFileName(None, "Define a .txt file in which write")
         FromTile2GlobCoordinate.FromTile2GlobCoordinate(tile_fname, tile_info, txt_path)
 
-
     def set_color_channel(self):
         """Call pop up tool to set channels"""
         self.nucs_spts_ch  =  SetColorChannel.getChannels() - 1
-
 
     def rmv_mitoticalTS(self):
         """Call PopUpTool up tool to remove mitotical spots"""
@@ -1374,7 +1300,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.msg = MessageSpotsCoords()
             self.msg.show()
 
-
     def update_mip_spots_sgnl(self):
         """Update the work of RemoveMitoticalSpots in the main GUI"""
         self.spots_3D                =  self.mpp8.spots_3D
@@ -1385,12 +1310,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.mpp8.close()
         self.nuc_spots_conn()
 
-
     def false_clc_makeup(self):
         """Write multi tiff file of the false colored movie"""
         folder_name  =  str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select the folder with the analyzed data"))
         FalseColoredMakeUp.FalseColoredMakeUp(folder_name)
-
 
     def check_results(self):
         self.busy_indicator()
@@ -1405,7 +1328,6 @@ class MainWindow(QtWidgets.QMainWindow):
             traceback.print_exc()
 
         self.ready_indicator()
-
 
 
 class ChopStack(QtWidgets.QWidget):
@@ -1486,20 +1408,17 @@ class ChopStack(QtWidgets.QWidget):
         self.time_lbl        =  time_lbl
         self.frame_numb_lbl  =  frame_numb_lbl
 
-
     def mtss_st(self):
         """Set first mitosis frames"""
         mtss_st_val       =  self.framepp1.currentIndex
         self.mtss_st_val  =  mtss_st_val
         self.mtss_st_lbl.setText("  Start  " + str(self.mtss_st_val))
 
-
     def mtss_end(self):
         """Set the last mitosis frame"""
         mtss_end_val       =  self.framepp1.currentIndex
         self.mtss_end_val  =  mtss_end_val
         self.mtss_end_lbl.setText("  End  " + str(self.mtss_end_val))
-
 
     def done(self):
         """Close the popup tool and write the data in the analysis folder"""
@@ -1511,12 +1430,10 @@ class ChopStack(QtWidgets.QWidget):
 
         self.close()
 
-
     def timelabel(self):
         """Time label updater"""
         self.time_lbl.setText("time  " + time.strftime("%M:%S", time.gmtime(self.framepp1.currentIndex * self.time_step_value)))
         self.frame_numb_lbl.setText("frame  "  +  str(self.framepp1.currentIndex))
-
 
 
 class ModifierCycleTool(QtWidgets.QWidget):
@@ -1611,7 +1528,6 @@ class ModifierCycleTool(QtWidgets.QWidget):
 
         self.framepp1.setCurrentIndex(self.cif_start)
 
-
     def keyPressEvent(self, event):
         """Control-Z for nuclei manual correction"""
         if event.key() == (Qt.ControlModifier and Qt.Key_Z):
@@ -1629,7 +1545,6 @@ class ModifierCycleTool(QtWidgets.QWidget):
 
         if event.key() == (QtCore.Qt.ControlModifier and Qt.Key_Delete):
             self.modify_lbls()
-
 
     def click(self, event):
         """Defining mouse interaction: positioning the segment on the frame"""
@@ -1650,7 +1565,6 @@ class ModifierCycleTool(QtWidgets.QWidget):
                 self.framepp1.addItem(self.roi)
 
             self.c_count += 1
-
 
     def modify_lbls(self):
         """Modify the segmentattion"""
@@ -1680,19 +1594,15 @@ class ModifierCycleTool(QtWidgets.QWidget):
         self.framepp1.updateImage()
         self.bufframe  =  bufframe
 
-
-
     def update_frame1(self):
         """Synchronize frame 1 index with the 2"""
         self.framepp1.setCurrentIndex(self.framepp2.currentIndex)
         self.frame_numb_lbl.setText("frame  "  +  str(self.framepp1.currentIndex))
 
-
     def update_frame2(self):
         """Synchronize frame 2 index with the 1"""
         self.framepp2.setCurrentIndex(self.framepp1.currentIndex)
         self.frame_numb_lbl.setText("frame  "  +  str(self.framepp1.currentIndex))
-
 
     def shuffle_clrs(self):
         """Shuffle colors"""
@@ -1702,13 +1612,11 @@ class ModifierCycleTool(QtWidgets.QWidget):
         mycmap  =  pg.ColorMap(np.linspace(0, 1, self.nuclei_labels.max()), color=self.colors4map)
         self.framepp1.setColorMap(mycmap)
 
-
     @QtCore.pyqtSlot()
     def update_mainwindows(self):
         """Send signal to the main GUI for updating"""
         val  =  self.framepp1.currentIndex
         self.procStart.emit(val)
-
 
 
 class ModifierMitosisTool(QtWidgets.QWidget):
@@ -1944,7 +1852,6 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         self.prolif_ratio_edt   =  prolif_ratio_edt
         self.size_thr_edt       =  size_thr_edt
 
-
         if mtx_tot.sum() == 0:
             self.framepp1.setImage(self.labbs, levels=(0, self.labbs.max()))
             self.framepp1.setColorMap(pg.ColorMap(np.linspace(0, 1, self.labbs.max()), color=self.colors4map[:self.labbs.max()]))
@@ -2006,16 +1913,13 @@ class ModifierMitosisTool(QtWidgets.QWidget):
 
         self.framepp1.setCurrentIndex(self.cif_start)
 
-
     def gfilt_water_var(self, text):
         """Set the parameter for the watershed algorithm"""
-        self.gfilt_water_value  =  np.int(text)
-
+        self.gfilt_water_value  =  int(text)
 
     def circ_thr_var(self, text):
         """Set the circularity threshold"""
         self.circ_thr_value  =  float(text)
-
 
     def auto_segm(self):
         """Automatically segment nuclei of the current frame"""
@@ -2025,31 +1929,26 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         self.framepp1.setColorMap(pg.ColorMap(np.linspace(0, 1, self.labbs.max()), color=self.colors4map[:self.labbs.max()]))
         self.framepp1.setCurrentIndex(cif)
 
-
     def dist_singtrck_var(self, text):
         """Set the distance threshold for the single nucleus tracking"""
-        self.dist_singtrck_value  =  np.float(text)
-
+        self.dist_singtrck_value  =  float(text)
 
     def overlap_ratio_var(self, text):
         """Set overlapp ratio for tracking"""
-        self.overlap_ratio_value  =  np.float(text)
-
+        self.overlap_ratio_value  =  float(text)
 
     def prolif_ratio_var(self, text):
         """Set proliferation ratio"""
-        self.prolif_ratio_value  =  np.float(text)
-
+        self.prolif_ratio_value  =  float(text)
 
     def size_thr_var(self, text):
         """Set nucleus size threshold"""
-        self.size_thr_value  =  np.float(text)
-
+        self.size_thr_value  =  float(text)
 
     def mmodify_segm(self):
         """Activate the tool for manual corrections"""
         cif  =  self.framepp1.currentIndex
-        hh   =  self.framepp1.view.viewRange()
+        # hh   =  self.framepp1.view.viewRange()
 
         if self.mdone_flag == 0:
             pp       =  self.roi.getHandles()
@@ -2090,14 +1989,13 @@ class ModifierMitosisTool(QtWidgets.QWidget):
 #             self.left  +=  msk
 #             self.left  +=  2 * (np.sign(self.left4manual) - msk)
 
-            self.framepp1.setImage(self.mtx_tot + self.left, levels=(0, self.mtx_tot.max()))
+            self.framepp1.setImage(self.mtx_tot + self.left, levels=(0, self.mtx_tot.max()), autoRange=False)
             self.framepp1.setColorMap(pg.ColorMap(np.linspace(0, 1, self.mtx_tot.max()), color=self.colors4map[:self.mtx_tot.max()]))
 
 #         self.framepp1.removeItem(self.roi)
         self.framepp1.setCurrentIndex(cif)
-        self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
-        self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
-
+        # self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
+        # self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
 
     def mdone(self):
         """Automatic tracking during mitosis."""
@@ -2108,7 +2006,7 @@ class ModifierMitosisTool(QtWidgets.QWidget):
             self.roi_flag  =  0
 
         mts_trk           =  MitosisCrossing3.MitosisCrossing3(self.labbs, self.overlap_ratio_value, self.prolif_ratio_value, self.size_thr_value, self.dist_singtrck_value)
-        self.mtx_tot      =  (mts_trk.mtx_tot + 2 * np.sign(mts_trk.mtx_tot)).astype(np.int)
+        self.mtx_tot      =  (mts_trk.mtx_tot + 2 * np.sign(mts_trk.mtx_tot)).astype(int)
         self.left4manual  =  mts_trk.left4manual.astype(np.uint16)
 
 #         msk  =  np.zeros(self.left4manual.shape, dtype=np.uint16)
@@ -2142,7 +2040,6 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         self.dist_singtrck_lbl.setEnabled(True)
         # self.mdone_btn.setEnabled(False)
 
-
     def cut_left(self, state):
         """Activate checkbox to cut left"""
         if state == QtCore.Qt.Checked:
@@ -2155,7 +2052,6 @@ class ModifierMitosisTool(QtWidgets.QWidget):
                 self.givecolor_tggl.toggle()
         else:
             self.cut_left_flag  =  0
-
 
     def remove_wr(self, state):
         """Activate checkbox to remove badly assigned tags"""
@@ -2170,7 +2066,6 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         else:
             self.rmv_wr_flag  =  0
 
-
     def pickcolor(self, state):
         """Activate checkbox to pick a tag"""
         if state == QtCore.Qt.Checked:
@@ -2183,7 +2078,6 @@ class ModifierMitosisTool(QtWidgets.QWidget):
                 self.givecolor_tggl.toggle()
         else:
             self.pickcolor_flag  =  0
-
 
     def givecolor(self, state):
         """Activate the checkbox to give a tag"""
@@ -2198,13 +2092,12 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         else:
             self.givecolor_flag  =  0
 
-
     def click(self, event):
         """Definition of the function involving the mouse-click"""
         event.accept()
 
         if self.rmv_wr_flag + self.pickcolor_flag + self.givecolor_flag == 0:
-            pos        =  np.round(event.pos()).astype(np.int)
+            pos        =  np.round(event.pos()).astype(int)
             modifiers  =  QtWidgets.QApplication.keyboardModifiers()
 
             if modifiers  ==  QtCore.Qt.ShiftModifier:
@@ -2223,7 +2116,7 @@ class ModifierMitosisTool(QtWidgets.QWidget):
                 self.c_count  +=  1
 
         if self.rmv_wr_flag == 1:
-            pos        =  np.round(event.pos()).astype(np.int)
+            pos        =  np.round(event.pos()).astype(int)
             modifiers  =  QtWidgets.QApplication.keyboardModifiers()
 
             if modifiers  ==  QtCore.Qt.ShiftModifier:
@@ -2232,9 +2125,9 @@ class ModifierMitosisTool(QtWidgets.QWidget):
                     self.buff4man  =  np.copy(self.left4manual)
                     self.buffmtx   =  np.copy(self.mtx_tot)
                     cif            =  self.framepp1.currentIndex
-                    hh             =  self.framepp1.view.viewRange()
+                    # hh             =  self.framepp1.view.viewRange()
 
-                    lab2rem  =  (self.mtx_tot[cif:, :, :] == self.mtx_tot[cif, np.round(pos[0]).astype(np.int), np.round(pos[1]).astype(np.int)]).astype(np.int)
+                    lab2rem  =  (self.mtx_tot[cif:, :, :] == self.mtx_tot[cif, np.round(pos[0]).astype(int), np.round(pos[1]).astype(int)]).astype(int)
 
 #                     msk  =  np.zeros(lab2rem.shape, dtype=np.uint16)
 #                     for t in range(lab2rem.shape[0]):
@@ -2257,28 +2150,25 @@ class ModifierMitosisTool(QtWidgets.QWidget):
 
                     self.left  *=  np.sign(self.left4manual)
 
-
 #                     self.left[cif:, :, :]  +=  msk
 #                     self.left[cif:, :, :]  +=  (2 * (np.sign(lab2rem) - msk)).astype(np.uint16)
-                    self.framepp1.setImage(self.mtx_tot + self.left, levels=(0, self.mtx_tot.max()))
+                    self.framepp1.setImage(self.mtx_tot + self.left, levels=(0, self.mtx_tot.max()), autoRange=False)
                     self.framepp1.setColorMap(pg.ColorMap(np.linspace(0, 1, self.mtx_tot.max()), color=self.colors4map[:self.mtx_tot.max()]))
 
                     self.framepp1.setCurrentIndex(cif)
-                    self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
-                    self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
-
+                    # self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
+                    # self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
 
         if self.pickcolor_flag == 1:
-            pos        =  np.round(event.pos()).astype(np.int)
+            pos        =  np.round(event.pos()).astype(int)
             modifiers  =  QtWidgets.QApplication.keyboardModifiers()
 
             if modifiers  ==  QtCore.Qt.ShiftModifier:
-                self.pickedlab  =  self.mtx_tot[self.framepp1.currentIndex, np.round(pos[0]).astype(np.int), np.round(pos[1]).astype(np.int)]
-
+                self.pickedlab  =  self.mtx_tot[self.framepp1.currentIndex, np.round(pos[0]).astype(int), np.round(pos[1]).astype(int)]
 
         if self.givecolor_flag == 1 and self.pickedlab != 0:
 
-            pos        =  np.round(event.pos()).astype(np.int)
+            pos        =  np.round(event.pos()).astype(int)
             modifiers  =  QtWidgets.QApplication.keyboardModifiers()
 
             if modifiers  ==  QtCore.Qt.ShiftModifier:
@@ -2287,29 +2177,28 @@ class ModifierMitosisTool(QtWidgets.QWidget):
                     self.buff4man  =  np.copy(self.left4manual)
                     self.buffmtx   =  np.copy(self.mtx_tot)
                     cif            =  self.framepp1.currentIndex
-                    hh             =  self.framepp1.view.viewRange()
+                    # hh             =  self.framepp1.view.viewRange()
 
                     idx_ref   =  self.left4manual[cif, pos[0], pos[1]]
                     rgp_ref   =  regionprops((self.left4manual[cif, :, :] == idx_ref).astype(np.uint16))
                     ctrs_ref  =  rgp_ref[0]['centroid']
 
-                    if self.left4manual[cif, np.round(ctrs_ref[0]).astype(np.int), np.round(ctrs_ref[1]).astype(np.int)] != 0:
+                    if self.left4manual[cif, np.round(ctrs_ref[0]).astype(int), np.round(ctrs_ref[1]).astype(int)] != 0:
                         nucleus                        =   NucleiConnect4MTool.NucleiConnect4MTool(self.left4manual[cif:, :, :], idx_ref, self.dist_singtrck_value).nucleus.astype(np.uint16)
                         self.left4manual[cif:, :, :]  *=  (1 - nucleus)
                         self.mtx_tot[cif:, :, :]      +=  self.pickedlab * nucleus
                         self.left[cif:, :, :]         *=  (1 - nucleus)
 
                     else:
-                        nucleus                      =   (self.left4manual[cif, :, :] == self.left4manual[cif, np.round(pos[0]).astype(np.int), np.round(pos[1]).astype(np.int)]).astype(np.uint16)
+                        nucleus                      =   (self.left4manual[cif, :, :] == self.left4manual[cif, np.round(pos[0]).astype(int), np.round(pos[1]).astype(int)]).astype(np.uint16)
                         self.left4manual[cif, :, :]  *=  (1 - nucleus)
                         self.mtx_tot[cif, :, :]      +=  self.pickedlab * nucleus
                         self.left[cif:, :, :]        *=  (1 - nucleus)
 
-                    self.framepp1.setImage(self.mtx_tot + self.left)
+                    self.framepp1.setImage(self.mtx_tot + self.left, autoRange=False)
                     self.framepp1.setCurrentIndex(cif)
-                    self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
-                    self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
-
+                    # self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
+                    # self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
 
     def keyPressEvent(self, event):
         """Shortcut definition for the undo and toogles."""
@@ -2317,7 +2206,7 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         if event.key() == (Qt.ControlModifier and Qt.Key_Z):
 
             cif  =  self.framepp1.currentIndex
-            hh   =  self.framepp1.view.viewRange()
+            # hh   =  self.framepp1.view.viewRange()
 
             if self.mdone_flag == 0:
                 self.labbs  =  np.copy(self.bufflabbs)
@@ -2335,13 +2224,12 @@ class ModifierMitosisTool(QtWidgets.QWidget):
                 self.left   =  np.zeros(self.mtx_tot.shape)
                 self.left  +=  msk
                 self.left  +=  2 * (np.sign(self.left4manual) - msk)
-                self.framepp1.setImage(self.mtx_tot + self.left, levels=(0, self.mtx_tot.max()))
+                self.framepp1.setImage(self.mtx_tot + self.left, levels=(0, self.mtx_tot.max()), autoRange=False)
                 self.framepp1.setColorMap(pg.ColorMap(np.linspace(0, 1, self.mtx_tot.max()), color=self.colors4map[:self.mtx_tot.max()]))
 
             self.framepp1.setCurrentIndex(cif)
-            self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
-            self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
-
+            # self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
+            # self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
 
         if event.key() == (QtCore.Qt.ControlModifier and Qt.Key_Delete):
             self.mmodify_segm()
@@ -2360,14 +2248,12 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         if event.key() == Qt.Key_3:
             self.cut_left_tggl.setCheckState(2)
 
-
-
     def checkwork(self):
         """Check that for each tracked spot the number of connected components is
            1 at the biginning, 2 at the end and there are no oscillations in between."""
         reload(EvolutionController)
         cif  =  self.framepp1.currentIndex
-        hh   =  self.framepp1.view.viewRange()
+        # hh   =  self.framepp1.view.viewRange()
         evc  =  EvolutionController.EvolutionControllerDM(self.mtx_tot, self.labbs)
 
         for t in range(evc.conc_nuc_wrong.shape[0]):
@@ -2382,13 +2268,12 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         self.left  =   np.zeros(self.mtx_tot.shape)
         self.left  +=  msk
         self.left  +=  2 * (np.sign(self.left4manual) - msk)
-        self.framepp1.setImage(self.mtx_tot + self.left, levels=(0, self.mtx_tot.max()))
+        self.framepp1.setImage(self.mtx_tot + self.left, levels=(0, self.mtx_tot.max()), autoRange=False)
         self.framepp1.setColorMap(pg.ColorMap(np.linspace(0, 1, self.mtx_tot.max()), color=self.colors4map[:self.mtx_tot.max()]))
 
         self.framepp1.setCurrentIndex(cif)
-        self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
-        self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
-
+        # self.framepp1.view.setXRange(hh[0][0], hh[0][1], padding=.0002)
+        # self.framepp1.view.setYRange(hh[1][0], hh[1][1], padding=.0002)
 
     def shuffle_clrs(self):
         """Shuffle colors of the color map"""
@@ -2400,25 +2285,21 @@ class ModifierMitosisTool(QtWidgets.QWidget):
         except AttributeError:
             self.framepp1.setColorMap(pg.ColorMap(np.linspace(0, 1, self.labbs.max()), color=self.colors4map[:self.labbs.max()]))
 
-
     def update_frame2(self):
         """Function to keep the frames synchronized."""
         self.framepp2.setCurrentIndex(self.framepp1.currentIndex)
         self.frame_numb_lbl.setText("frame  "  +  str(self.framepp1.currentIndex))
-
 
     def update_frame1(self):
         """Function to keep the frames synchronized."""
         self.framepp1.setCurrentIndex(self.framepp2.currentIndex)
         self.frame_numb_lbl.setText("frame  "  +  str(self.framepp2.currentIndex))
 
-
     @QtCore.pyqtSlot()
     def update_mainwindows2(self):
         np.save('tracked_nucs.npy', self.mtx_tot)
         val  =  self.framepp1.currentIndex
         self.procStart.emit(val)
-
 
 
 class SpotsAnalyser(QtWidgets.QWidget):
@@ -2486,18 +2367,15 @@ class SpotsAnalyser(QtWidgets.QWidget):
         self.setGeometry(300, 300, 600, 400)
         self.setWindowTitle('Visualize Spots Tool')
 
-
     def update_frame2(self):
         """Synchronize frame 1 index with the frame 2 index"""
         self.frame2.setCurrentIndex(self.frame1.currentIndex)
         self.frame_numb_lbl.setText("frame  "  +  str(self.frame1.currentIndex))
 
-
     def update_frame1(self):
         """Synchronize frame 1 index with the frame 2 index"""
         self.frame1.setCurrentIndex(self.frame2.currentIndex)
         self.frame_numb_lbl.setText("frame  "  +  str(self.frame2.currentIndex))
-
 
 
 class MergePartialTool(QtWidgets.QWidget):
@@ -2542,7 +2420,7 @@ class MergePartialTool(QtWidgets.QWidget):
                 green[t, x, :]  =  green4D[t, :, x, :].max(0)
 
         tot              =  np.zeros(red.shape + (3,), dtype=np.uint8)
-#         tot[:, :, :, 0]  =  red.astype(np.float) / red.max()
+#         tot[:, :, :, 0]  =  red.astype(float) / red.max()
         tot[:, :, :, 0]  =  (255 * (red / red.max())).astype(np.uint8)
         tot[:, :, :, 1]  =  (255 * (green / green.max())).astype(np.uint8)
 
@@ -2553,7 +2431,7 @@ class MergePartialTool(QtWidgets.QWidget):
             colors4map.append(mycmap[k, :])
         colors4map[0]  =  np.array([0, 0, 0])
         colors4map[1]  =  np.array([0, 255, 0])
-        colors4map1    =  colors4map[:np.int(first.max())]
+        colors4map1    =  colors4map[:int(first.max())]
         mycolormap     =  pg.ColorMap(np.linspace(0, 1, first.max()), color=colors4map1)
 
         tabs  =  QtWidgets.QTabWidget()
@@ -2691,7 +2569,7 @@ class MergePartialTool(QtWidgets.QWidget):
 
         self.framepp3.setImage(self.nuc_active.nuclei_active3c)
         self.framepp4.setImage(self.evol_check.conc_nuc_wrong, levels=(0, self.evol_check.conc_nuc_wrong.max()))
-        colors4map    =  colors4map[:np.int(self.evol_check.conc_nuc_wrong.max())]
+        colors4map    =  colors4map[:int(self.evol_check.conc_nuc_wrong.max())]
         mycolormap2  =   pg.ColorMap(np.linspace(0, 1, self.evol_check.conc_nuc_wrong.max()), color=colors4map)
         self.framepp4.setColorMap(mycolormap2)
         self.nuc_act    =  self.nuc_active.nuclei_active
@@ -2701,11 +2579,9 @@ class MergePartialTool(QtWidgets.QWidget):
         self.setGeometry(300, 300, 600, 400)
         self.setWindowTitle("Merging Tool")
 
-
     def step_analysis_var(self, text):
         """Set the value of the step"""
-        self.step_analysis_value  =  np.int(text)
-
+        self.step_analysis_value  =  int(text)
 
     def falsecolored(self):
         """Generate false colored moviie"""
@@ -2713,7 +2589,6 @@ class MergePartialTool(QtWidgets.QWidget):
         self.framepp4.setImage(self.evol_check.conc_nuc_wrong, levels=(0, self.evol_check.conc_nuc_wrong.max()))
         self.nuc_act    =  np.copy(self.nuc_active.nuclei_active)
         self.nuc_act3c  =  np.copy(self.nuc_active.nuclei_active3c)
-
 
     def gastru_params(self):
         """Set gastrulation line"""
@@ -2731,18 +2606,16 @@ class MergePartialTool(QtWidgets.QWidget):
         ww.addItem(roi)
         self.roi            =  roi
 
-
     def save_merged(self):
         """Save the merged partial analysis"""
         reload(SaveMergedResults)
         SaveMergedResults.SaveMergedResults(self.folder_path, self.mm, self.nuc_active, self.evol_check, self.spots_tracked)
         WriteMergedData.WriteMergedData(self.nuc_act3c, self.first, self.folder_path)
 
-
     def set_steps(self):
         """Set the region to study and pop-up a sample"""
         self.roi.update()
-        self.mu     =  np.int(self.roi.getRegion()[1])
+        self.mu     =  int(self.roi.getRegion()[1])
         self.sigma  =  int(self.step_analysis_value)
         y_len       =  self.nuc_act3c.shape[2]
 
@@ -2754,11 +2627,9 @@ class MergePartialTool(QtWidgets.QWidget):
         self.mask  +=  self.nuc_act3c
         pg.image(self.mask)
 
-
     def write_spatial(self):
         """Write xls file with the results of the merged analysis"""
         WriteMergedData.WriteMergedDataSpatial(self.folder_path, self.nuc_act, self.mm.conc_wild, self.mm.conc_nuc, self.mu - self.sigma, self.mu + self.sigma, self.folder_path, self.mask, self.spots_tracked, self.ints_tot, self.vol_tot, self.soft_version)
-
 
     def shuffle_colors(self):
         """Shuffle colors"""
@@ -2774,7 +2645,6 @@ class MergePartialTool(QtWidgets.QWidget):
         mycolormap2          =  pg.ColorMap(np.linspace(0, 1, self.evol_check.conc_nuc_wrong.max()), color=self.colors4map)
         self.framepp4.setColorMap(mycolormap2)
 
-
     def update_frame1(self):
         """Keep all the frames synchronized from frame 1"""
         self.framepp2.setCurrentIndex(self.framepp1.currentIndex)
@@ -2782,13 +2652,11 @@ class MergePartialTool(QtWidgets.QWidget):
         self.framepp4.setCurrentIndex(self.framepp1.currentIndex)
         self.frame_lbl.setText("Frame " + str(self.framepp1.currentIndex))
 
-
     def update_frame2(self):
         """Keep all the frames synchronized from frame 2"""
         self.framepp1.setCurrentIndex(self.framepp2.currentIndex)
         self.framepp3.setCurrentIndex(self.framepp2.currentIndex)
         self.framepp4.setCurrentIndex(self.framepp2.currentIndex)
-
 
     def update_frame3(self):
         """Keep all the frames synchronized from frame 3"""
@@ -2796,13 +2664,11 @@ class MergePartialTool(QtWidgets.QWidget):
         self.framepp2.setCurrentIndex(self.framepp3.currentIndex)
         self.framepp4.setCurrentIndex(self.framepp3.currentIndex)
 
-
     def update_frame4(self):
         """Keep all the frames synchronized from frame 4"""
         self.framepp1.setCurrentIndex(self.framepp4.currentIndex)
         self.framepp2.setCurrentIndex(self.framepp4.currentIndex)
         self.framepp3.setCurrentIndex(self.framepp4.currentIndex)
-
 
     def closeEvent(self, event):
         """Confirm dialogue to close pop-up tool"""
@@ -2813,7 +2679,6 @@ class MergePartialTool(QtWidgets.QWidget):
             event.accept()
         else:
             event.ignore()
-
 
 
 class FlagSpotsDetection(QtWidgets.QDialog):
@@ -2846,14 +2711,11 @@ class FlagSpotsDetection(QtWidgets.QDialog):
         self.setGeometry(300, 300, 350, 100)
         self.setWindowTitle("Choose Algorithm")
 
-
     def oldnew_val(self, text):
         self.filter_nofilter  =  text
 
-
     def cierra(self):
         self.close()
-
 
     def oldnew(self):
         return self.filter_nofilter
@@ -2864,7 +2726,6 @@ class FlagSpotsDetection(QtWidgets.QDialog):
         result  =  dialog.exec_()
         flag    =  str(dialog.oldnew())
         return flag
-
 
 
 class CroppingTool(QtWidgets.QWidget):
@@ -2907,12 +2768,10 @@ class CroppingTool(QtWidgets.QWidget):
         self.setGeometry(300, 300, 600, 400)
         self.setWindowTitle("Crop Tool")
 
-
     @QtCore.pyqtSlot()
     def crop_to_mainwindows(self):
         val  =  self.framepp1.currentIndex
         self.procStart.emit(val)
-
 
 
 class SpotNcuDistanceThr(QtWidgets.QDialog):
@@ -2950,18 +2809,14 @@ class SpotNcuDistanceThr(QtWidgets.QDialog):
         self.setGeometry(300, 300, 200, 50)
         self.setWindowTitle("Spot Nuc Max Distance")
 
-
     def numb_pixels_var(self, text):
-        self.numb_pixels_value  =  np.int(text)
-
+        self.numb_pixels_value  =  int(text)
 
     def input_close(self):
         self.close()
 
-
     def numb_pixels(self):
         return self.numb_pixels_value
-
 
     @staticmethod
     def getNumb(parent=None):
@@ -2969,7 +2824,6 @@ class SpotNcuDistanceThr(QtWidgets.QDialog):
         result       =  dialog.exec_()
         numb_pixels  =  dialog.numb_pixels()
         return numb_pixels
-
 
 
 class TileMap(QtWidgets.QDialog):
@@ -3045,30 +2899,23 @@ class TileMap(QtWidgets.QDialog):
         self.setGeometry(300, 300, 300, 100)
         self.setWindowTitle("Tile Map Coordinates")
 
-
     def numb_hor_squares_var(self, text):
-        self.numb_hor_squares_value  =  np.int(text)
-
+        self.numb_hor_squares_value  =  int(text)
 
     def capture_hor_square_var(self, text):
-        self.capture_hor_square_value  =  np.int(text)
-
+        self.capture_hor_square_value  =  int(text)
 
     def numb_ver_squares_var(self, text):
-        self.numb_ver_squares_value  =  np.int(text)
-
+        self.numb_ver_squares_value  =  int(text)
 
     def capture_ver_square_var(self, text):
-        self.capture_ver_square_value  =  np.int(text)
-
+        self.capture_ver_square_value  =  int(text)
 
     def input_close(self):
         self.close()
 
-
     def tile_info(self):
         return [self.numb_hor_squares_value, self.capture_hor_square_value, self.numb_ver_squares_value, self.capture_ver_square_value]
-
 
     @staticmethod
     def getNumb(parent=None):
@@ -3076,7 +2923,6 @@ class TileMap(QtWidgets.QDialog):
         result     =  dialog.exec_()
         tile_info  =  dialog.tile_info()
         return tile_info
-
 
 
 class SetColorChannel(QtWidgets.QDialog):
@@ -3135,23 +2981,18 @@ class SetColorChannel(QtWidgets.QDialog):
         self.setGeometry(300, 300, 200, 100)
         self.setWindowTitle("Set Channels")
 
-
     def nuclei_channel_switch(self, text):
         self.nuclei_channel  =  int(text)
 
-
     def spots_channel_switch(self, text):
         self.spots_channel  =  int(text)
-
 
     def enter_values(self):
         self.channels_values  =  np.array([self.nuclei_channel, self.spots_channel])
         self.close()
 
-
     def params(self):
         return self.channels_values
-
 
     @staticmethod
     def getChannels(parent=None):
@@ -3159,7 +3000,6 @@ class SetColorChannel(QtWidgets.QDialog):
         result  =  dialog.exec_()
         flag    =  dialog.params()
         return flag
-
 
 
 class RemoveMitoticalSpots(QtWidgets.QWidget):
@@ -3287,28 +3127,22 @@ class RemoveMitoticalSpots(QtWidgets.QWidget):
         self.t_track_end_value  =  0
         self.framepp_segtrk.setImage(np.sign(self.spots_3D.spots_vol))
 
-
     def update_frame_3chs(self):
         self.framepp_3chs.setCurrentIndex(self.framepp_segtrk.currentIndex)
         self.frame_lbl.setText("Frame " + str(self.framepp_3chs.currentIndex))
 
-
     def update_frame_segtrk(self):
         self.framepp_segtrk.setCurrentIndex(self.framepp_3chs.currentIndex)
-
 
     def t_track_end(self):
         self.t_track_end_value  =  int(self.framepp_3chs.currentIndex)
         self.frame_chosen_lbl.setText("(" + str(self.t_track_end_value) + ")")
 
-
     def spts_thr_var(self, text):
-        self.spts_thr_value  =  np.float(text)
-
+        self.spts_thr_value  =  float(text)
 
     def dist_thr_var(self, text):
-        self.dist_thr_value  =  np.float(text)
-
+        self.dist_thr_value  =  float(text)
 
     def track(self):
         reload(VisualTracked)
@@ -3319,13 +3153,11 @@ class RemoveMitoticalSpots(QtWidgets.QWidget):
         self.framepp_segtrk.setImage(bff2show)
         self.framepp_segtrk.updateImage()
 
-
     @QtCore.pyqtSlot()
     def send(self):
         self.spots_3d  =  VisualTracked.RemoveTracked(self.spots_3D.spots_coords, self.spots_3D.spots_tzxy, self.spots_3D.spots_ints, self.spots_3D.spots_vol, self.spts_trck_info, self.green4D)
 
         self.procStart.emit()
-
 
 
 class MessageSpotsCoords(QtWidgets.QWidget):
@@ -3357,7 +3189,6 @@ class MessageSpotsCoords(QtWidgets.QWidget):
     def chiudi(self):
         """Close dialog"""
         self.close()
-
 
 
 class CheckResults(QtWidgets.QWidget):
@@ -3410,11 +3241,9 @@ class CheckResults(QtWidgets.QWidget):
         self.setGeometry(300, 300, 600, 400)
         self.setWindowTitle("Remove Mitotical TS")
 
-
     def tag_nuc_var(self, text):
         """Set the tag of nucleus to check"""
-        self.tag_nuc_value  =  np.int(text)
-
+        self.tag_nuc_value  =  int(text)
 
     def tag_nuc_show(self):
         """Prepare the matrix image to show"""
@@ -3427,11 +3256,9 @@ class CheckResults(QtWidgets.QWidget):
         self.frame_clrs.setImage(mtx2show)
         self.frame_clrs.setCurrentIndex(cif)
 
-
     def img_index_change(self):
         """Update the frame number label"""
         self.frame_numb_lbl.setText("Frame numb " + str(self.frame_clrs.currentIndex))
-
 
 
 def main():
@@ -3454,15 +3281,3 @@ if __name__ == '__main__':
 
     main()
     sys.excepthook = except_hook
-
-# if __name__ == "__main__":
-# 
-#     sys.excepthook = except_hook
-# 
-#     app     =  QtWidgets.QApplication(sys.argv)
-#     window  =  MainWindow()
-#     window.show()
-#     sys.exit(app.exec_())
-
-
-
